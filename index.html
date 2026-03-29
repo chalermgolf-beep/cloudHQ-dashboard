@@ -481,25 +481,27 @@ async function loadData() {
       fetchSheet(SHEET_NAME_SCURVE)
     ]);
 
-    // Clean CSV — header is always row index 3 (4th row) in this sheet
+    // Force header at row 3 (4th row) — this sheet always has 3 title rows before headers
     const cleanCell = s => (s||'').replace(/^"|"$/g,'').trim();
     const cleanedRows = taskRows.map(r => r.map(cleanCell));
-    // Try to find header dynamically, fallback to row 3
-    let headerIdx = cleanedRows.findIndex(r => r.some(c => c.trim() === 'ID') && r.some(c => c.trim() === 'Task Name'));
-    if (headerIdx < 0) headerIdx = 3;
+    const headerIdx = 3;
     const header = cleanedRows[headerIdx];
     const colIdx = n => {
       let i = header.findIndex(h => h === n);
       if (i < 0) i = header.findIndex(h => h.includes(n));
       return i;
     };
+    // Debug: log header to console
+    console.log('Header row:', header);
     const CI = {
       id: colIdx('ID'), level: colIdx('Level'), name: colIdx('Task Name'),
       contract: colIdx('Contract'), type: colIdx('Type'),
       start: colIdx('Auto Start'), finish: colIdx('Finish'),
-      pct: colIdx('% Complete'), critical: colIdx('Critical'), status: colIdx('Status'),
+      pct: colIdx('% Complete'), critical: colIdx('Critical
+Path'), status: colIdx('Status'),
       dur: colIdx('Duration'), weight: colIdx('Weight')
     };
+    console.log('CI:', CI);
 
     allTasks = cleanedRows.slice(headerIdx + 1)
       .filter(r => r[CI.id] && !isNaN(parseFloat(r[CI.id])))
