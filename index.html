@@ -481,11 +481,15 @@ async function loadData() {
       fetchSheet(SHEET_NAME_SCURVE)
     ]);
 
-    // Find header row (row with "ID")
-    let headerIdx = taskRows.findIndex(r => r[0] === 'ID');
+    // Find header row (row with "ID") — search all columns too
+    let headerIdx = taskRows.findIndex(r => r.some(c => c === 'ID'));
     if (headerIdx < 0) throw new Error('ไม่พบ header row "ID" ใน Tasks sheet');
     const header = taskRows[headerIdx];
-    const colIdx = n => header.findIndex(h => h.includes(n));
+    const colIdx = n => {
+      let i = header.findIndex(h => h === n);
+      if (i < 0) i = header.findIndex(h => h.includes(n));
+      return i;
+    };
     const CI = {
       id: colIdx('ID'), level: colIdx('Level'), name: colIdx('Task Name'),
       contract: colIdx('Contract'), type: colIdx('Type'),
