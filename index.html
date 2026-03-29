@@ -481,11 +481,11 @@ async function loadData() {
       fetchSheet(SHEET_NAME_SCURVE)
     ]);
 
-    // Clean CSV then find header
+    // Clean CSV then find header (ID may appear in any cell of the row)
     const cleanCell = s => (s||'').replace(/^"|"$/g,'').trim();
     const cleanedRows = taskRows.map(r => r.map(cleanCell));
-    let headerIdx = cleanedRows.findIndex(r => r[0] === 'ID' || r.some(c => c === 'ID'));
-    if (headerIdx < 0) throw new Error('ไม่พบ header ID row0=' + (cleanedRows[0]||[]).slice(0,3).join('|'));
+    let headerIdx = cleanedRows.findIndex(r => r.some(c => c.trim() === 'ID') && r.some(c => c.includes('Task Name')));
+    if (headerIdx < 0) throw new Error('ไม่พบ header row0=' + (cleanedRows[0]||[]).slice(0,3).join('|'));
     const header = cleanedRows[headerIdx];
     const colIdx = n => {
       let i = header.findIndex(h => h === n);
