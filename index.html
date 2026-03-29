@@ -7,358 +7,114 @@
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
-  :root {
-    --bg: #0d1117;
-    --surface: #161b22;
-    --surface2: #21262d;
-    --border: #30363d;
-    --text: #e6edf3;
-    --muted: #8b949e;
-    --blue: #58a6ff;
-    --blue-dim: #1f3b5a;
-    --green: #3fb950;
-    --green-dim: #1a3a24;
-    --yellow: #d29922;
-    --yellow-dim: #3a2d10;
-    --red: #f85149;
-    --red-dim: #3a1a1a;
-    --purple: #bc8cff;
-    --accent: #238636;
-    --font: 'IBM Plex Sans Thai', system-ui, sans-serif;
-    --mono: 'IBM Plex Mono', monospace;
-  }
-
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: var(--font);
-    font-size: 14px;
-    line-height: 1.6;
-    min-height: 100vh;
-  }
-
-  /* ── Header ── */
-  .header {
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
-    padding: 14px 24px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-  }
-  .header-left { display: flex; align-items: center; gap: 14px; }
-  .logo {
-    width: 32px; height: 32px;
-    background: var(--blue);
-    border-radius: 6px;
-    display: flex; align-items: center; justify-content: center;
-    font-weight: 600; font-size: 14px; color: #0d1117;
-  }
-  .header-title { font-size: 15px; font-weight: 600; }
-  .header-sub { font-size: 12px; color: var(--muted); }
-  .status-pill {
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-size: 11px;
-    font-weight: 500;
-    border: 1px solid;
-  }
-  .pill-inprogress { background: var(--blue-dim); color: var(--blue); border-color: #1f4a7d; }
-  .pill-notstarted { background: var(--surface2); color: var(--muted); border-color: var(--border); }
-  .pill-completed { background: var(--green-dim); color: var(--green); border-color: #1e4a2a; }
-  .pill-critical { background: var(--red-dim); color: var(--red); border-color: #5a2020; }
-
-  .last-updated {
-    font-size: 11px;
-    color: var(--muted);
-    font-family: var(--mono);
-    display: flex; align-items: center; gap: 6px;
-  }
-  .pulse {
-    width: 7px; height: 7px; border-radius: 50%;
-    background: var(--green);
-    animation: pulse 2s infinite;
-  }
-  @keyframes pulse {
-    0%, 100% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.4; transform: scale(0.8); }
-  }
-
-  /* ── Layout ── */
-  .container { max-width: 1400px; margin: 0 auto; padding: 20px 24px; }
-
-  /* ── Metrics Row ── */
-  .metrics-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-    gap: 12px;
-    margin-bottom: 20px;
-  }
-  .metric {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 14px 16px;
-  }
-  .metric-label { font-size: 11px; color: var(--muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em; }
-  .metric-val { font-size: 26px; font-weight: 600; font-family: var(--mono); line-height: 1; }
-  .metric-sub { font-size: 11px; color: var(--muted); margin-top: 4px; }
-  .val-blue { color: var(--blue); }
-  .val-green { color: var(--green); }
-  .val-red { color: var(--red); }
-  .val-yellow { color: var(--yellow); }
-
-  /* ── Main Grid ── */
-  .main-grid {
-    display: grid;
-    grid-template-columns: 1fr 340px;
-    gap: 16px;
-    margin-bottom: 16px;
-  }
-  @media (max-width: 900px) { .main-grid { grid-template-columns: 1fr; } }
-
-  /* ── Cards ── */
-  .card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    overflow: hidden;
-  }
-  .card-header {
-    padding: 12px 16px;
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-  .card-title { font-size: 13px; font-weight: 500; }
-  .card-body { padding: 0; }
-
-  /* ── Tabs ── */
-  .tabs { display: flex; border-bottom: 1px solid var(--border); }
-  .tab {
-    padding: 10px 16px;
-    font-size: 12px;
-    font-weight: 500;
-    color: var(--muted);
-    cursor: pointer;
-    border-bottom: 2px solid transparent;
-    transition: all 0.15s;
-    background: none;
-    border-top: none;
-    border-left: none;
-    border-right: none;
-    font-family: var(--font);
-  }
-  .tab:hover { color: var(--text); }
-  .tab.active { color: var(--blue); border-bottom-color: var(--blue); }
-  .tab-panel { display: none; }
-  .tab-panel.active { display: block; }
-
-  /* ── Task Table ── */
-  .task-table { width: 100%; border-collapse: collapse; }
-  .task-table th {
-    padding: 8px 12px;
-    text-align: left;
-    font-size: 11px;
-    font-weight: 500;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    background: var(--surface2);
-    border-bottom: 1px solid var(--border);
-    position: sticky;
-    top: 57px;
-    z-index: 10;
-  }
-  .task-table td {
-    padding: 8px 12px;
-    border-bottom: 1px solid var(--border);
-    font-size: 12.5px;
-    vertical-align: middle;
-  }
-  .task-table tr:last-child td { border-bottom: none; }
-  .task-table tr:hover td { background: var(--surface2); }
-
-  .task-name { font-weight: 400; }
-  .task-name.is-summary { font-weight: 500; color: var(--blue); }
-  .task-name.is-milestone { color: var(--yellow); }
-  .indent-1 { padding-left: 20px; }
-  .indent-2 { padding-left: 36px; }
-  .indent-3 { padding-left: 52px; }
-
-  .prog-wrap { display: flex; align-items: center; gap: 6px; min-width: 90px; }
-  .prog-bg { background: var(--surface2); border-radius: 3px; height: 5px; flex: 1; min-width: 50px; }
-  .prog-fill { height: 5px; border-radius: 3px; transition: width 0.4s; }
-  .fill-blue { background: var(--blue); }
-  .fill-green { background: var(--green); }
-  .fill-red { background: var(--red); }
-  .prog-pct { font-size: 11px; color: var(--muted); font-family: var(--mono); white-space: nowrap; }
-
-  .crit-dot { color: var(--red); font-size: 8px; margin-right: 2px; }
-  .mono { font-family: var(--mono); font-size: 11.5px; color: var(--muted); }
-
-  /* ── Right Sidebar ── */
-  .sidebar { display: flex; flex-direction: column; gap: 16px; }
-
-  /* ── S-Curve ── */
-  .chart-wrap { padding: 16px; position: relative; }
-  canvas { max-width: 100%; }
-
-  /* ── Contract Summary ── */
-  .contract-row {
-    padding: 12px 16px;
-    border-bottom: 1px solid var(--border);
-  }
-  .contract-row:last-child { border-bottom: none; }
-  .contract-name { font-weight: 500; font-size: 13px; margin-bottom: 8px; }
-  .contract-meta { display: flex; gap: 16px; flex-wrap: wrap; }
-  .contract-stat { font-size: 11px; color: var(--muted); }
-  .contract-stat span { color: var(--text); font-family: var(--mono); }
-
-  /* ── Legend ── */
-  .legend { display: flex; gap: 12px; flex-wrap: wrap; padding: 10px 16px; border-top: 1px solid var(--border); }
-  .legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--muted); }
-  .legend-dot { width: 8px; height: 8px; border-radius: 50%; }
-
-  /* ── Loading & Error ── */
-  .loading {
-    display: flex; align-items: center; justify-content: center;
-    padding: 60px 24px; gap: 10px; color: var(--muted); font-size: 13px;
-  }
-  .spinner {
-    width: 18px; height: 18px;
-    border: 2px solid var(--border);
-    border-top-color: var(--blue);
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
-
-  .error-box {
-    margin: 16px;
-    padding: 14px 16px;
-    background: var(--red-dim);
-    border: 1px solid #5a2020;
-    border-radius: 8px;
-    font-size: 13px;
-    color: var(--red);
-  }
-
-  /* ── Config panel ── */
-  .config-bar {
-    background: var(--surface);
-    border: 1px solid var(--yellow);
-    border-radius: 8px;
-    padding: 12px 16px;
-    margin-bottom: 16px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    flex-wrap: wrap;
-  }
-  .config-bar label { font-size: 12px; color: var(--yellow); white-space: nowrap; }
-  .config-bar input {
-    flex: 1;
-    min-width: 260px;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    color: var(--text);
-    font-family: var(--mono);
-    font-size: 12px;
-    padding: 6px 10px;
-    outline: none;
-  }
-  .config-bar input:focus { border-color: var(--blue); }
-  .btn {
-    padding: 6px 14px;
-    border-radius: 6px;
-    font-size: 12px;
-    font-weight: 500;
-    cursor: pointer;
-    border: 1px solid;
-    font-family: var(--font);
-    transition: all 0.15s;
-  }
-  .btn-primary { background: var(--accent); border-color: #2ea043; color: #fff; }
-  .btn-primary:hover { background: #2ea043; }
-  .btn-ghost { background: transparent; border-color: var(--border); color: var(--muted); }
-  .btn-ghost:hover { color: var(--text); border-color: #8b949e; }
-
-  .overallbar {
-    background: var(--surface2);
-    border-radius: 4px;
-    height: 8px;
-    margin-top: 6px;
-  }
-  .overallbar-fill {
-    height: 8px;
-    border-radius: 4px;
-    background: linear-gradient(90deg, var(--blue) 0%, var(--purple) 100%);
-    transition: width 0.6s ease;
-  }
+:root {
+  --bg:#0d1117;--surface:#161b22;--surface2:#21262d;--border:#30363d;
+  --text:#e6edf3;--muted:#8b949e;--blue:#58a6ff;--green:#3fb950;
+  --red:#f85149;--yellow:#d29922;--purple:#bc8cff;
+  --font:'IBM Plex Sans Thai',system-ui,sans-serif;
+  --mono:'IBM Plex Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:14px;}
+.header{background:var(--surface);border-bottom:1px solid var(--border);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+.logo{width:32px;height:32px;background:var(--blue);border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:14px;color:#0d1117;}
+.header-title{font-size:15px;font-weight:600;}
+.header-sub{font-size:12px;color:var(--muted);}
+.pulse{width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulse 2s infinite;display:inline-block;}
+.pulse.err{background:var(--red);}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+.btn{padding:6px 14px;border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;border:1px solid;font-family:var(--font);transition:all .15s;}
+.btn-ghost{background:transparent;border-color:var(--border);color:var(--muted);}
+.btn-ghost:hover{color:var(--text);}
+.btn-primary{background:#238636;border-color:#2ea043;color:#fff;}
+.container{max-width:1400px;margin:0 auto;padding:20px 24px;}
+.config-bar{background:var(--surface);border:1px solid var(--yellow);border-radius:8px;padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.config-bar label{font-size:12px;color:var(--yellow);white-space:nowrap;}
+.config-bar input{flex:1;min-width:260px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:var(--mono);font-size:12px;padding:6px 10px;outline:none;}
+.config-bar input:focus{border-color:var(--blue);}
+.metrics-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:20px;}
+.metric{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:14px 16px;}
+.metric-label{font-size:11px;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.05em;}
+.metric-val{font-size:26px;font-weight:600;font-family:var(--mono);line-height:1;}
+.main-grid{display:grid;grid-template-columns:1fr 340px;gap:16px;margin-bottom:16px;}
+@media(max-width:900px){.main-grid{grid-template-columns:1fr;}}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:8px;overflow:hidden;}
+.card-header{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.card-title{font-size:13px;font-weight:500;}
+.sidebar{display:flex;flex-direction:column;gap:16px;}
+.task-table{width:100%;border-collapse:collapse;}
+.task-table th{padding:8px 12px;text-align:left;font-size:11px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;background:var(--surface2);border-bottom:1px solid var(--border);}
+.task-table td{padding:8px 12px;border-bottom:1px solid var(--border);font-size:12.5px;vertical-align:middle;}
+.task-table tr:last-child td{border-bottom:none;}
+.task-table tr:hover td{background:var(--surface2);}
+.prog-bg{background:var(--surface2);border-radius:3px;height:5px;width:60px;display:inline-block;}
+.prog-fill{height:5px;border-radius:3px;}
+.pill{display:inline-block;font-size:11px;padding:3px 8px;border-radius:20px;font-weight:500;}
+.pill-done{background:#1a3a24;color:var(--green);border:1px solid #1e4a2a;}
+.pill-prog{background:#1f3b5a;color:var(--blue);border:1px solid #1f4a7d;}
+.pill-not{background:var(--surface2);color:var(--muted);border:1px solid var(--border);}
+.loading-box{display:flex;align-items:center;justify-content:center;padding:60px;gap:10px;color:var(--muted);}
+.spinner{width:18px;height:18px;border:2px solid var(--border);border-top-color:var(--blue);border-radius:50%;animation:spin .8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.err-box{margin:16px;padding:14px;background:#3a1a1a;border:1px solid #5a2020;border-radius:8px;color:var(--red);font-size:13px;}
+.overallbar{background:var(--surface2);border-radius:4px;height:8px;margin-top:6px;}
+.overallbar-fill{height:8px;border-radius:4px;background:var(--blue);}
+.mono{font-family:var(--mono);font-size:11.5px;color:var(--muted);}
+.crit{color:var(--red);font-size:9px;margin-right:2px;}
+.legend{display:flex;gap:12px;flex-wrap:wrap;padding:10px 16px;border-top:1px solid var(--border);}
+.legend-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted);}
+.ldot{width:8px;height:8px;border-radius:50%;}
+.chart-wrap{padding:12px;position:relative;}
+select{background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:4px 8px;font-size:12px;font-family:var(--font);}
 </style>
 </head>
 <body>
-
-<!-- Header -->
 <div class="header">
-  <div class="header-left">
+  <div style="display:flex;align-items:center;gap:14px;">
     <div class="logo">CQ</div>
     <div>
       <div class="header-title">CloudHQ Project Control</div>
       <div class="header-sub">Implementation Schedule — Amata City (Rayong)</div>
     </div>
   </div>
-  <div style="display:flex; align-items:center; gap:12px;">
-    <div class="last-updated">
-      <div class="pulse"></div>
-      <span id="last-update-text">Loading...</span>
-    </div>
+  <div style="display:flex;align-items:center;gap:12px;">
+    <span style="font-size:11px;color:var(--muted);font-family:var(--mono);display:flex;align-items:center;gap:6px;">
+      <span class="pulse" id="status-dot"></span>
+      <span id="status-txt">Loading...</span>
+    </span>
     <button class="btn btn-ghost" onclick="loadData()">↻ Refresh</button>
   </div>
 </div>
 
 <div class="container">
-
-  <!-- Config bar (shown when no Sheet ID set) -->
   <div class="config-bar" id="config-bar">
     <label>⚙ Google Sheets ID:</label>
-    <input type="text" id="sheet-id-input" placeholder="ใส่ Spreadsheet ID จาก URL ของ Google Sheets..." />
-    <button class="btn btn-primary" onclick="saveConfig()">บันทึก & โหลด</button>
-    <a href="SETUP.md" class="btn btn-ghost" style="text-decoration:none;">คู่มือ</a>
+    <input type="text" id="sheet-input" placeholder="วาง Spreadsheet ID ที่นี่..."/>
+    <button class="btn btn-primary" onclick="saveAndLoad()">บันทึก & โหลด</button>
   </div>
 
-  <!-- Metrics -->
-  <div class="metrics-grid" id="metrics-grid">
+  <div class="metrics-grid">
     <div class="metric"><div class="metric-label">Total Tasks</div><div class="metric-val" id="m-total">—</div></div>
-    <div class="metric"><div class="metric-label">Completed</div><div class="metric-val val-green" id="m-completed">—</div></div>
-    <div class="metric"><div class="metric-label">In Progress</div><div class="metric-val val-blue" id="m-inprogress">—</div></div>
-    <div class="metric"><div class="metric-label">Not Started</div><div class="metric-val" style="color:var(--muted)" id="m-notstarted">—</div></div>
-    <div class="metric"><div class="metric-label">Critical Tasks</div><div class="metric-val val-red" id="m-critical">—</div></div>
-    <div class="metric"><div class="metric-label">Avg Progress</div><div class="metric-val val-blue" id="m-avg">—</div><div class="overallbar"><div class="overallbar-fill" id="m-avgbar" style="width:0%"></div></div></div>
+    <div class="metric"><div class="metric-label">Completed</div><div class="metric-val" id="m-done" style="color:var(--green)">—</div></div>
+    <div class="metric"><div class="metric-label">In Progress</div><div class="metric-val" id="m-prog" style="color:var(--blue)">—</div></div>
+    <div class="metric"><div class="metric-label">Not Started</div><div class="metric-val" id="m-not" style="color:var(--muted)">—</div></div>
+    <div class="metric"><div class="metric-label">Critical Tasks</div><div class="metric-val" id="m-crit" style="color:var(--red)">—</div></div>
+    <div class="metric"><div class="metric-label">Avg Progress</div><div class="metric-val" id="m-avg" style="color:var(--blue)">—</div><div class="overallbar"><div class="overallbar-fill" id="m-avgbar" style="width:0%"></div></div></div>
     <div class="metric"><div class="metric-label">C1 Deadline</div><div class="metric-val" style="font-size:15px;padding-top:6px;">23 Nov 26</div></div>
     <div class="metric"><div class="metric-label">C2 Deadline</div><div class="metric-val" style="font-size:15px;padding-top:6px;">26 Jun 27</div></div>
   </div>
 
-  <!-- Main content -->
   <div class="main-grid">
-    <!-- Left: Task Table -->
     <div class="card">
       <div class="card-header">
         <div class="card-title">Task Schedule</div>
-        <div style="display:flex;gap:6px;align-items:center;">
-          <select id="filter-contract" onchange="renderTasks()" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:4px 8px;font-size:12px;font-family:var(--font);">
+        <div style="display:flex;gap:6px;">
+          <select id="f-contract" onchange="renderTasks()">
             <option value="all">All Contracts</option>
             <option value="Contract 1">Contract 1</option>
             <option value="Contract 2">Contract 2</option>
           </select>
-          <select id="filter-status" onchange="renderTasks()" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:4px 8px;font-size:12px;font-family:var(--font);">
+          <select id="f-status" onchange="renderTasks()">
             <option value="all">All Status</option>
             <option value="In Progress">In Progress</option>
             <option value="Not Started">Not Started</option>
@@ -366,156 +122,159 @@
           </select>
         </div>
       </div>
-      <div id="task-loading" class="loading"><div class="spinner"></div>กำลังโหลดข้อมูล...</div>
+      <div id="task-loading" class="loading-box"><div class="spinner"></div>กำลังโหลดข้อมูล...</div>
       <div id="task-error" style="display:none;"></div>
-      <div id="task-container" style="overflow-x:auto; display:none;">
+      <div id="task-wrap" style="display:none;overflow-x:auto;">
         <table class="task-table">
-          <thead>
-            <tr>
-              <th style="width:36px;">ID</th>
-              <th>Task Name</th>
-              <th style="width:90px;">Start</th>
-              <th style="width:90px;">Finish</th>
-              <th style="width:50px;">Days</th>
-              <th style="width:130px;">Progress</th>
-              <th style="width:100px;">Status</th>
-            </tr>
-          </thead>
-          <tbody id="task-tbody"></tbody>
+          <thead><tr><th>ID</th><th>Task Name</th><th>Start</th><th>Finish</th><th>Days</th><th>Progress</th><th>Status</th></tr></thead>
+          <tbody id="task-body"></tbody>
         </table>
       </div>
     </div>
 
-    <!-- Right: Sidebar -->
     <div class="sidebar">
-      <!-- S-Curve -->
       <div class="card">
-        <div class="card-header">
-          <div class="card-title">S-Curve</div>
-          <div style="font-size:11px;color:var(--muted);">Planned vs Actual</div>
-        </div>
-        <div class="chart-wrap" style="height:200px; padding:12px;">
-          <canvas id="scurve-chart"></canvas>
-        </div>
+        <div class="card-header"><div class="card-title">S-Curve</div><div style="font-size:11px;color:var(--muted);">Planned vs Actual</div></div>
+        <div class="chart-wrap" style="height:200px;"><canvas id="scurve-chart"></canvas></div>
         <div class="legend">
-          <div class="legend-item"><div class="legend-dot" style="background:var(--blue);"></div>Planned</div>
-          <div class="legend-item"><div class="legend-dot" style="background:var(--red);"></div>Actual</div>
+          <div class="legend-item"><div class="ldot" style="background:var(--blue);"></div>Planned</div>
+          <div class="legend-item"><div class="ldot" style="background:var(--red);"></div>Actual</div>
         </div>
       </div>
-
-      <!-- Status Donut -->
       <div class="card">
         <div class="card-header"><div class="card-title">Status Breakdown</div></div>
-        <div class="chart-wrap" style="height:180px; padding:12px;">
-          <canvas id="status-chart"></canvas>
-        </div>
+        <div class="chart-wrap" style="height:180px;"><canvas id="status-chart"></canvas></div>
         <div class="legend" id="status-legend"></div>
       </div>
-
-      <!-- Contract Summary -->
       <div class="card">
         <div class="card-header"><div class="card-title">Contract Summary</div></div>
         <div id="contract-summary"></div>
       </div>
     </div>
   </div>
-
 </div>
 
 <script>
-// ── Config ──────────────────────────────────────────────
-const SHEET_NAME_TASKS = 'Tasks';
-const SHEET_NAME_SCURVE = 'S-Curve';
-let SHEET_ID = localStorage.getItem('cloudHQ_sheetId') || '1upGrorkIBiQuPBeMJSYsu9IDZ2Y_PSdP7wEyB0ppj6Y';
-let allTasks = [];
-let scurveChart, statusChart;
+var SHEET_ID = localStorage.getItem('cHQ_sid') || '';
+var allTasks = [];
+var scC, stC;
 
-function saveConfig() {
-  const val = document.getElementById('sheet-id-input').value.trim();
-  if (!val) return alert('กรุณาใส่ Spreadsheet ID');
-  SHEET_ID = val;
-  localStorage.setItem('cloudHQ_sheetId', val);
+function saveAndLoad() {
+  var v = document.getElementById('sheet-input').value.trim();
+  if (!v) { alert('กรุณาใส่ Spreadsheet ID'); return; }
+  SHEET_ID = v;
+  localStorage.setItem('cHQ_sid', v);
   document.getElementById('config-bar').style.display = 'none';
   loadData();
 }
 
-// ── Google Sheets JSON fetch ──────────────────────────────
-async function fetchSheet(sheetName) {
-  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(sheetName)}`;
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  const text = await res.text();
-  const json = JSON.parse(text.replace(/^[^{]*/, '').replace(/[^}]*$/, ''));
-  const rows = json.table.rows.map(row =>
-    (row.c || []).map(cell => cell ? (cell.f !== null && cell.f !== undefined ? String(cell.f) : cell.v !== null && cell.v !== undefined ? String(cell.v) : '') : '')
-  );
-  return rows;
+function setStatus(ok, txt) {
+  document.getElementById('status-dot').className = 'pulse' + (ok ? '' : ' err');
+  document.getElementById('status-txt').textContent = txt;
 }
 
-// ── Load & Parse ─────────────────────────────────────────
+async function fetchSheet(name) {
+  var url = 'https://docs.google.com/spreadsheets/d/' + SHEET_ID + '/gviz/tq?tqx=out:json&sheet=' + encodeURIComponent(name);
+  var res = await fetch(url);
+  if (!res.ok) throw new Error('HTTP ' + res.status);
+  var txt = await res.text();
+  var start = txt.indexOf('{');
+  var end = txt.lastIndexOf('}');
+  var data = JSON.parse(txt.slice(start, end + 1));
+  return data.table;
+}
+
+function cellVal(cell) {
+  if (!cell) return '';
+  if (cell.f != null) return String(cell.f);
+  if (cell.v != null) return String(cell.v);
+  return '';
+}
+
 async function loadData() {
   if (!SHEET_ID) {
     document.getElementById('config-bar').style.display = 'flex';
-    document.getElementById('task-loading').innerHTML = '<div style="color:var(--muted);padding:24px;">⚙ ใส่ Google Sheets ID ด้านบนก่อนครับ</div>';
+    document.getElementById('task-loading').innerHTML = '<div style="color:var(--muted);padding:40px;text-align:center;">⚙ ใส่ Google Sheets ID ด้านบนก่อนครับ</div>';
     return;
   }
   document.getElementById('config-bar').style.display = 'none';
   document.getElementById('task-loading').style.display = 'flex';
-  document.getElementById('task-container').style.display = 'none';
+  document.getElementById('task-loading').innerHTML = '<div class="spinner"></div>กำลังโหลดข้อมูล...';
+  document.getElementById('task-wrap').style.display = 'none';
   document.getElementById('task-error').style.display = 'none';
+  setStatus(true, 'Loading...');
 
   try {
-    const [taskRows, scurveRows] = await Promise.all([
-      fetchSheet(SHEET_NAME_TASKS),
-      fetchSheet(SHEET_NAME_SCURVE)
-    ]);
+    var taskTable = await fetchSheet('Tasks');
+    var scTable = await fetchSheet('S-Curve');
 
-    // Force header at row 3 (4th row) — this sheet always has 3 title rows before headers
-    const cleanCell = s => (s||'').replace(/^"|"$/g,'').trim();
-    const cleanedRows = taskRows.map(r => r.map(cleanCell));
-    const headerIdx = 3;
-    const header = cleanedRows[headerIdx];
-    const colIdx = n => {
-      let i = header.findIndex(h => h === n);
-      if (i < 0) i = header.findIndex(h => h.includes(n));
+    // Find header row — row that has "ID" and "Task Name"
+    var cols = taskTable.cols || [];
+    var rows = taskTable.rows || [];
+
+    // Get column labels
+    var headers = cols.map(function(c) { return (c.label || '').trim(); });
+    console.log('Headers from cols:', headers);
+
+    // Find column indices
+    function ci(name) {
+      var i = headers.indexOf(name);
+      if (i < 0) i = headers.findIndex(function(h) { return h.includes(name); });
       return i;
-    };
-    // Debug: log header to console
-    console.log('Header row:', header);
-    const CI = {
-      id: colIdx('ID'), level: colIdx('Level'), name: colIdx('Task Name'),
-      contract: colIdx('Contract'), type: colIdx('Type'),
-      start: colIdx('Auto Start'), finish: colIdx('Finish'),
-      pct: colIdx('% Complete'), critical: colIdx('Critical
-Path'), status: colIdx('Status'),
-      dur: colIdx('Duration'), weight: colIdx('Weight')
-    };
-    console.log('CI:', CI);
+    }
 
-    allTasks = cleanedRows.slice(headerIdx + 1)
-      .filter(r => r[CI.id] && !isNaN(parseFloat(r[CI.id])))
-      .map(r => ({
-        id: +r[CI.id],
-        level: +r[CI.level] || 0,
-        name: r[CI.name] || '',
-        contract: r[CI.contract] || '',
-        type: r[CI.type] || 'Task',
-        start: fmtDate(r[CI.start]),
-        finish: fmtDate(r[CI.finish]),
-        pct: Math.round((parseFloat(r[CI.pct]) || 0) * 100),
-        critical: (r[CI.critical] || '').toLowerCase().includes('critical'),
-        status: r[CI.status] || 'Not Started',
-        dur: Math.round(parseFloat(r[CI.dur]) || 0),
-        weight: parseFloat(r[CI.weight]) || 0,
-      }));
+    var idIdx = ci('ID');
+    var levelIdx = ci('Level');
+    var nameIdx = ci('Task Name');
+    var contractIdx = ci('Contract');
+    var typeIdx = ci('Type');
+    var startIdx = ci('Auto Start');
+    var finishIdx = ci('Finish');
+    var pctIdx = ci('% Complete');
+    var critIdx = ci('Critical');
+    var statusIdx = ci('Status');
+    var durIdx = ci('Duration');
+    var weightIdx = ci('Weight');
+
+    console.log('idIdx:', idIdx, 'nameIdx:', nameIdx, 'statusIdx:', statusIdx);
+
+    // Skip rows until we find real data (ID is a number)
+    allTasks = [];
+    rows.forEach(function(row) {
+      var cells = row.c || [];
+      var idVal = cellVal(cells[idIdx]);
+      if (!idVal || isNaN(parseFloat(idVal))) return;
+      var pctRaw = parseFloat(cellVal(cells[pctIdx])) || 0;
+      var pct = pctRaw <= 1 ? Math.round(pctRaw * 100) : Math.round(pctRaw);
+      allTasks.push({
+        id: parseFloat(idVal),
+        level: parseFloat(cellVal(cells[levelIdx])) || 0,
+        name: cellVal(cells[nameIdx]),
+        contract: cellVal(cells[contractIdx]),
+        type: cellVal(cells[typeIdx]) || 'Task',
+        start: cellVal(cells[startIdx]),
+        finish: cellVal(cells[finishIdx]),
+        pct: pct,
+        critical: (cellVal(cells[critIdx]) || '').toLowerCase().includes('critical'),
+        status: cellVal(cells[statusIdx]) || 'Not Started',
+        dur: Math.round(parseFloat(cellVal(cells[durIdx])) || 0),
+        weight: parseFloat(cellVal(cells[weightIdx])) || 0,
+      });
+    });
+
+    console.log('Tasks loaded:', allTasks.length);
 
     // S-Curve
-    let scIdx = scurveRows.findIndex(r => r[0] === 'Month End');
-    const scData = scIdx >= 0 ? scurveRows.slice(scIdx + 1).filter(r => r[0] && r[1]).map(r => ({
-      label: fmtDateShort(r[0]),
-      planned: Math.round(parseFloat(r[1].replace('%','')) * 100 * 10) / 10,
-      actual: Math.round(parseFloat(r[2].replace('%','')) * 100 * 10) / 10,
-    })) : [];
+    var scCols = (scTable.cols || []).map(function(c) { return (c.label || '').trim(); });
+    var scRows = scTable.rows || [];
+    var scData = scRows.map(function(row) {
+      var c = row.c || [];
+      return {
+        label: cellVal(c[0]),
+        planned: Math.round((parseFloat(cellVal(c[1])) || 0) * 1000) / 10,
+        actual: Math.round((parseFloat(cellVal(c[2])) || 0) * 1000) / 10,
+      };
+    }).filter(function(d) { return d.label && d.label !== 'Month End'; });
 
     renderMetrics();
     renderTasks();
@@ -523,190 +282,133 @@ Path'), status: colIdx('Status'),
     renderStatus();
     renderContractSummary();
 
-    document.getElementById('last-update-text').textContent = 'Updated: ' + new Date().toLocaleTimeString('th-TH');
     document.getElementById('task-loading').style.display = 'none';
-    document.getElementById('task-container').style.display = 'block';
+    document.getElementById('task-wrap').style.display = 'block';
+    setStatus(true, 'Updated: ' + new Date().toLocaleTimeString('th-TH'));
 
   } catch(e) {
+    console.error(e);
     document.getElementById('task-loading').style.display = 'none';
-    const eb = document.getElementById('task-error');
+    var eb = document.getElementById('task-error');
     eb.style.display = 'block';
-    eb.innerHTML = `<div class="error-box">⚠ โหลดข้อมูลไม่ได้: ${e.message}<br><small style="color:var(--muted)">ตรวจสอบว่า Google Sheets เป็น Public และ Sheet ID ถูกต้อง</small></div>`;
-    document.getElementById('last-update-text').textContent = 'Error';
+    eb.innerHTML = '<div class="err-box">⚠ ' + e.message + '<br><small style="color:var(--muted)">ตรวจสอบว่า Google Sheets เป็น Public และ ID ถูกต้อง</small></div>';
+    setStatus(false, 'Error');
   }
 }
 
-function fmtDate(s) {
-  if (!s) return '';
-  const d = new Date(s);
-  if (isNaN(d)) return s;
-  return d.toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'2-digit' });
-}
-function fmtDateShort(s) {
-  if (!s) return '';
-  const d = new Date(s);
-  if (isNaN(d)) return s;
-  return d.toLocaleDateString('en-GB', { month:'short', year:'2-digit' });
-}
-
-// ── Metrics ──────────────────────────────────────────────
 function renderMetrics() {
-  const real = allTasks.filter(t => t.type !== 'Summary' && t.id > 1);
-  const completed = real.filter(t => t.status === 'Completed').length;
-  const inprogress = real.filter(t => t.status === 'In Progress').length;
-  const notstarted = real.filter(t => t.status === 'Not Started').length;
-  const critical = real.filter(t => t.critical).length;
-  const totalWeight = real.reduce((a,t) => a + t.weight, 0);
-  const avgPct = totalWeight > 0 ? real.reduce((a,t) => a + t.pct * t.weight, 0) / totalWeight : 0;
-
+  var real = allTasks.filter(function(t) { return t.type !== 'Summary' && t.id > 1; });
+  var done = real.filter(function(t) { return t.status === 'Completed'; }).length;
+  var prog = real.filter(function(t) { return t.status === 'In Progress'; }).length;
+  var not = real.filter(function(t) { return t.status === 'Not Started'; }).length;
+  var crit = real.filter(function(t) { return t.critical; }).length;
+  var tw = real.reduce(function(a,t) { return a+t.weight; }, 0);
+  var avg = tw > 0 ? real.reduce(function(a,t) { return a+t.pct*t.weight; }, 0) / tw : 0;
   document.getElementById('m-total').textContent = real.length;
-  document.getElementById('m-completed').textContent = completed;
-  document.getElementById('m-inprogress').textContent = inprogress;
-  document.getElementById('m-notstarted').textContent = notstarted;
-  document.getElementById('m-critical').textContent = critical;
-  document.getElementById('m-avg').textContent = avgPct.toFixed(1) + '%';
-  document.getElementById('m-avgbar').style.width = Math.min(avgPct, 100) + '%';
+  document.getElementById('m-done').textContent = done;
+  document.getElementById('m-prog').textContent = prog;
+  document.getElementById('m-not').textContent = not;
+  document.getElementById('m-crit').textContent = crit;
+  document.getElementById('m-avg').textContent = avg.toFixed(1) + '%';
+  document.getElementById('m-avgbar').style.width = Math.min(avg,100) + '%';
 }
 
-// ── Task Table ────────────────────────────────────────────
-function renderTasks() {
-  const filterC = document.getElementById('filter-contract').value;
-  const filterS = document.getElementById('filter-status').value;
+function pillClass(s) {
+  if (s === 'Completed') return 'pill-done';
+  if (s === 'In Progress') return 'pill-prog';
+  return 'pill-not';
+}
 
-  const rows = allTasks.filter(t => {
-    if (filterC !== 'all' && t.contract !== filterC && !t.contract.includes(filterC.replace('Contract ',''))) return false;
-    if (filterS !== 'all' && t.status !== filterS) return false;
+function renderTasks() {
+  var fc = document.getElementById('f-contract').value;
+  var fs = document.getElementById('f-status').value;
+  var filtered = allTasks.filter(function(t) {
+    if (fc !== 'all' && !t.contract.includes(fc.replace('Contract ',''))) return false;
+    if (fs !== 'all' && t.status !== fs) return false;
     return true;
   });
+  var html = filtered.map(function(t) {
+    var pad = ['','padding-left:16px','padding-left:28px','padding-left:40px'][Math.min(t.level,3)];
+    var fillColor = t.status === 'Completed' ? 'var(--green)' : t.critical ? 'var(--red)' : 'var(--blue)';
+    var pct = Math.min(t.pct, 100);
+    return '<tr><td class="mono">' + t.id + '</td>' +
+      '<td style="' + pad + '">' + (t.critical ? '<span class="crit">●</span>' : '') + t.name + '</td>' +
+      '<td class="mono">' + t.start + '</td>' +
+      '<td class="mono">' + t.finish + '</td>' +
+      '<td class="mono" style="text-align:center">' + t.dur + '</td>' +
+      '<td><div style="display:flex;align-items:center;gap:6px;"><div class="prog-bg"><div class="prog-fill" style="width:' + pct + '%;background:' + fillColor + '"></div></div><span class="mono">' + pct + '%</span></div></td>' +
+      '<td><span class="pill ' + pillClass(t.status) + '">' + t.status + '</span></td></tr>';
+  }).join('');
+  document.getElementById('task-body').innerHTML = html;
+}
 
-  const tbody = document.getElementById('task-tbody');
-  tbody.innerHTML = rows.map(t => {
-    const indent = ['', 'indent-1', 'indent-2', 'indent-3'][Math.min(t.level, 3)];
-    const nameClass = t.type === 'Summary' ? 'is-summary' : t.type === 'Milestone' ? 'is-milestone' : '';
-    const fillClass = t.status === 'Completed' ? 'fill-green' : t.critical ? 'fill-red' : 'fill-blue';
-    const pct = Math.min(t.pct, 100);
-    return `<tr>
-      <td class="mono">${t.id}</td>
-      <td>
-        <span class="task-name ${nameClass} ${indent}">
-          ${t.critical ? '<span class="crit-dot">●</span>' : ''}${escape(t.name)}
-        </span>
-      </td>
-      <td class="mono">${t.start}</td>
-      <td class="mono">${t.finish}</td>
-      <td class="mono" style="text-align:center;">${t.dur}</td>
-      <td>
-        <div class="prog-wrap">
-          <div class="prog-bg"><div class="prog-fill ${fillClass}" style="width:${pct}%"></div></div>
-          <span class="prog-pct">${pct}%</span>
-        </div>
-      </td>
-      <td><span class="status-pill ${statusPill(t.status)}">${t.status}</span></td>
-    </tr>`;
+function renderSCurve(data) {
+  if (scC) scC.destroy();
+  var ctx = document.getElementById('scurve-chart').getContext('2d');
+  scC = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: data.map(function(d) { return d.label; }),
+      datasets: [
+        {label:'Planned',data:data.map(function(d){return d.planned;}),borderColor:'#58a6ff',borderWidth:2,pointRadius:2,fill:false,tension:0.3},
+        {label:'Actual',data:data.map(function(d){return d.actual;}),borderColor:'#f85149',borderWidth:2,pointRadius:2,fill:false,tension:0.3,borderDash:[5,4]}
+      ]
+    },
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+      scales:{x:{ticks:{font:{size:10},color:'#8b949e',maxRotation:45},grid:{color:'#21262d'}},
+              y:{ticks:{font:{size:10},color:'#8b949e',callback:function(v){return v+'%'}},grid:{color:'#21262d'},min:0,max:110}}}
+  });
+}
+
+function renderStatus() {
+  if (stC) stC.destroy();
+  var real = allTasks.filter(function(t) { return t.type !== 'Summary' && t.id > 1; });
+  var counts = [
+    real.filter(function(t){return t.status==='Completed';}).length,
+    real.filter(function(t){return t.status==='In Progress';}).length,
+    real.filter(function(t){return t.status==='Not Started';}).length
+  ];
+  var ctx = document.getElementById('status-chart').getContext('2d');
+  stC = new Chart(ctx, {
+    type:'doughnut',
+    data:{labels:['Completed','In Progress','Not Started'],datasets:[{data:counts,backgroundColor:['#3fb950','#58a6ff','#30363d'],borderWidth:0}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}
+  });
+  var colors = ['#3fb950','#58a6ff','#8b949e'];
+  var labels = ['Completed','In Progress','Not Started'];
+  document.getElementById('status-legend').innerHTML = labels.map(function(l,i) {
+    return '<div class="legend-item"><div class="ldot" style="background:'+colors[i]+'"></div>'+l+' ('+counts[i]+')</div>';
   }).join('');
 }
 
-function statusPill(s) {
-  if (s === 'Completed') return 'pill-completed';
-  if (s === 'In Progress') return 'pill-inprogress';
-  if (s === 'Not Started') return 'pill-notstarted';
-  return 'pill-notstarted';
-}
-function escape(s) {
-  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-}
-
-// ── S-Curve ───────────────────────────────────────────────
-function renderSCurve(data) {
-  if (scurveChart) scurveChart.destroy();
-  const ctx = document.getElementById('scurve-chart').getContext('2d');
-  scurveChart = new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels: data.map(d => d.label),
-      datasets: [
-        { label: 'Planned', data: data.map(d => d.planned), borderColor: '#58a6ff', borderWidth: 2, pointRadius: 2, fill: false, tension: 0.3 },
-        { label: 'Actual', data: data.map(d => d.actual), borderColor: '#f85149', borderWidth: 2, pointRadius: 2, fill: false, tension: 0.3, borderDash: [5,4] }
-      ]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { display: false } },
-      scales: {
-        x: { ticks: { font: { size: 10 }, color: '#8b949e', maxRotation: 45 }, grid: { color: '#21262d' } },
-        y: { ticks: { font: { size: 10 }, color: '#8b949e', callback: v => v + '%' }, grid: { color: '#21262d' }, min: 0, max: 110 }
-      }
-    }
-  });
-}
-
-// ── Status Donut ──────────────────────────────────────────
-function renderStatus() {
-  if (statusChart) statusChart.destroy();
-  const real = allTasks.filter(t => t.type !== 'Summary' && t.id > 1);
-  const counts = {
-    'Completed': real.filter(t => t.status === 'Completed').length,
-    'In Progress': real.filter(t => t.status === 'In Progress').length,
-    'Not Started': real.filter(t => t.status === 'Not Started').length,
-  };
-  const colors = { 'Completed': '#3fb950', 'In Progress': '#58a6ff', 'Not Started': '#30363d' };
-  const ctx = document.getElementById('status-chart').getContext('2d');
-  statusChart = new Chart(ctx, {
-    type: 'doughnut',
-    data: {
-      labels: Object.keys(counts),
-      datasets: [{ data: Object.values(counts), backgroundColor: Object.keys(counts).map(k => colors[k]), borderWidth: 0, hoverOffset: 4 }]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { display: false } }
-    }
-  });
-
-  const legend = document.getElementById('status-legend');
-  legend.innerHTML = Object.entries(counts).map(([k,v]) =>
-    `<div class="legend-item"><div class="legend-dot" style="background:${colors[k]}"></div>${k} (${v})</div>`
-  ).join('');
-}
-
-// ── Contract Summary ──────────────────────────────────────
 function renderContractSummary() {
-  const contracts = ['Contract 1', 'Contract 2'];
-  const html = contracts.map(c => {
-    const tasks = allTasks.filter(t => t.contract === c && t.type !== 'Summary');
-    const completed = tasks.filter(t => t.status === 'Completed').length;
-    const totalW = tasks.reduce((a,t) => a+t.weight, 0);
-    const wpct = totalW > 0 ? (tasks.reduce((a,t) => a+t.pct*t.weight,0)/totalW).toFixed(1) : '0.0';
-    const deadline = c === 'Contract 1' ? '23 Nov 2026' : '26 Jun 2027';
-    return `<div class="contract-row">
-      <div class="contract-name" style="color:var(--blue)">${c}</div>
-      <div class="contract-meta">
-        <div class="contract-stat">Tasks: <span>${tasks.length}</span></div>
-        <div class="contract-stat">Completed: <span style="color:var(--green)">${completed}</span></div>
-        <div class="contract-stat">Deadline: <span>${deadline}</span></div>
-      </div>
-      <div style="margin-top:8px;">
-        <div style="font-size:10px;color:var(--muted);margin-bottom:3px;">Weighted Progress: ${wpct}%</div>
-        <div class="overallbar"><div class="overallbar-fill" style="width:${Math.min(+wpct,100)}%"></div></div>
-      </div>
-    </div>`;
+  var html = ['Contract 1','Contract 2'].map(function(c) {
+    var tasks = allTasks.filter(function(t) { return t.contract === c && t.type !== 'Summary'; });
+    var done = tasks.filter(function(t) { return t.status==='Completed'; }).length;
+    var tw = tasks.reduce(function(a,t){return a+t.weight;},0);
+    var wp = tw>0 ? (tasks.reduce(function(a,t){return a+t.pct*t.weight;},0)/tw).toFixed(1) : '0.0';
+    var dl = c==='Contract 1' ? '23 Nov 2026' : '26 Jun 2027';
+    return '<div style="padding:12px 16px;border-bottom:1px solid var(--border);">' +
+      '<div style="font-weight:500;color:var(--blue);margin-bottom:6px;">'+c+'</div>' +
+      '<div style="display:flex;gap:16px;font-size:11px;color:var(--muted);">' +
+      '<span>Tasks: <b style="color:var(--text)">'+tasks.length+'</b></span>' +
+      '<span>Done: <b style="color:var(--green)">'+done+'</b></span>' +
+      '<span>Deadline: <b style="color:var(--text)">'+dl+'</b></span></div>' +
+      '<div style="margin-top:8px;font-size:10px;color:var(--muted);">Progress: '+wp+'%</div>' +
+      '<div class="overallbar"><div class="overallbar-fill" style="width:'+Math.min(+wp,100)+'%"></div></div></div>';
   }).join('');
   document.getElementById('contract-summary').innerHTML = html;
 }
 
-// ── Init ──────────────────────────────────────────────────
+// Init
 if (SHEET_ID) {
   document.getElementById('config-bar').style.display = 'none';
-  document.getElementById('sheet-id-input').value = SHEET_ID;
+  document.getElementById('sheet-input').value = SHEET_ID;
 } else {
-  document.getElementById('task-loading').innerHTML =
-    '<div style="color:var(--muted);padding:40px 24px;text-align:center;">⚙ ใส่ Google Sheets ID ด้านบนเพื่อเริ่มต้น</div>';
+  document.getElementById('task-loading').innerHTML = '<div style="color:var(--muted);padding:40px;text-align:center;">⚙ ใส่ Google Sheets ID ด้านบนก่อนครับ</div>';
 }
-
 loadData();
-
-// Auto-refresh ทุก 5 นาที
-setInterval(() => { if (SHEET_ID) loadData(); }, 5 * 60 * 1000);
+setInterval(function(){ if(SHEET_ID) loadData(); }, 5*60*1000);
 </script>
 </body>
 </html>
