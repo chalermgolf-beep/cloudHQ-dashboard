@@ -272,11 +272,30 @@ function cellVal(cell) {
 
 function parseDate(s) {
   if (!s) return null;
+  // Thai month names
+  var thaiMonths = {
+    'ม.ค.':0,'ก.พ.':1,'มี.ค.':2,'เม.ย.':3,'พ.ค.':4,'มิ.ย.':5,
+    'ก.ค.':6,'ส.ค.':7,'ก.ย.':8,'ต.ค.':9,'พ.ย.':10,'ธ.ค.':11
+  };
+  // Match dd-Month-yy (Thai or English)
+  var m = s.match(/(\d+)[\/\-]([^\/\-]+)[\/\-](\d+)/);
+  if (m) {
+    var day = parseInt(m[1]);
+    var monStr = m[2].trim();
+    var year = parseInt(m[3]);
+    if (year < 100) year = year > 50 ? 1900+year : 2000+year;
+    // Thai Buddhist Era: if year > 2400, subtract 543
+    if (year > 2400) year -= 543;
+    var mon = thaiMonths[monStr];
+    if (mon === undefined) {
+      var eng = new Date(s);
+      if (!isNaN(eng)) return eng;
+      return null;
+    }
+    return new Date(year, mon, day);
+  }
   var d = new Date(s);
   if (!isNaN(d)) return d;
-  // try dd/mm/yy or dd-Mon-yy
-  var m = s.match(/(\d+)[\/\-](\w+)[\/\-](\d+)/);
-  if (m) return new Date(s);
   return null;
 }
 
