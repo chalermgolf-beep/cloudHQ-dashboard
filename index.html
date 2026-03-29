@@ -439,28 +439,17 @@ function saveConfig() {
   loadData();
 }
 
-// ── Google Sheets CSV fetch ──────────────────────────────
+// ── Google Sheets JSON fetch ──────────────────────────────
 async function fetchSheet(sheetName) {
-  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheetName)}`;
+  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(sheetName)}`;
   const res = await fetch(url);
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  return parseCSV(await res.text());
-}
-
-function parseCSV(text) {
-  const lines = text.split('\n').map(l => l.trim()).filter(l => l);
-  return lines.map(line => {
-    const cols = [];
-    let cur = '', inQ = false;
-    for (let i = 0; i < line.length; i++) {
-      const c = line[i];
-      if (c === '"') { inQ = !inQ; }
-      else if (c === ',' && !inQ) { cols.push(cur.trim()); cur = ''; }
-      else { cur += c; }
-    }
-    cols.push(cur.trim());
-    return cols;
-  });
+  const text = await res.text();
+  const json = JSON.parse(text.replace(/^[^{]*/, '').replace(/[^}]*$/, ''));
+  const rows = json.table.rows.map(row =>
+    (row.c || []).map(cell => cell ? (cell.f !== null && cell.f !== undefined ? String(cell.f) : cell.v !== null && cell.v !== undefined ? String(cell.v) : '') : '')
+  );
+  return rows;
 }
 
 // ── Load & Parse ─────────────────────────────────────────
