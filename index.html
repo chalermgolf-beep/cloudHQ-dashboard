@@ -481,10 +481,12 @@ async function loadData() {
       fetchSheet(SHEET_NAME_SCURVE)
     ]);
 
-    // Find header row (row with "ID") — search all columns too
-    let headerIdx = taskRows.findIndex(r => r.some(c => c === 'ID'));
-    if (headerIdx < 0) throw new Error('ไม่พบ header row "ID" ใน Tasks sheet');
-    const header = taskRows[headerIdx];
+    // Clean CSV then find header
+    const cleanCell = s => (s||'').replace(/^"|"$/g,'').trim();
+    const cleanedRows = taskRows.map(r => r.map(cleanCell));
+    let headerIdx = cleanedRows.findIndex(r => r[0] === 'ID' || r.some(c => c === 'ID'));
+    if (headerIdx < 0) throw new Error('ไม่พบ header ID row0=' + (cleanedRows[0]||[]).slice(0,3).join('|'));
+    const header = cleanedRows[headerIdx];
     const colIdx = n => {
       let i = header.findIndex(h => h === n);
       if (i < 0) i = header.findIndex(h => h.includes(n));
@@ -498,7 +500,7 @@ async function loadData() {
       dur: colIdx('Duration'), weight: colIdx('Weight')
     };
 
-    allTasks = taskRows.slice(headerIdx + 1)
+    allTasks = cleanedRows.slice(headerIdx + 1)
       .filter(r => r[CI.id] && !isNaN(parseFloat(r[CI.id])))
       .map(r => ({
         id: +r[CI.id],
